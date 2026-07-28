@@ -277,7 +277,7 @@ var _ = Describe("Population tests", func() {
 			}, timeout, pollingInterval).Should(BeTrue())
 		})
 
-		It("Should perform a Volume Snapshot clone through the DataSource field", func() {
+		It("Should perform a Volume Snapshot clone through the DataSource field", Label("RequiresSnapshot"), func() {
 			if !f.IsSnapshotStorageClassAvailable() {
 				Skip("Snapshot not possible")
 			}

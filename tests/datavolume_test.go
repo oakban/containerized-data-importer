@@ -3333,7 +3333,7 @@ var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]DataVolume tests", 
 				Expect(err).ToNot(HaveOccurred())
 				return dv
 			}),
-			Entry("Snapshot", func() *cdiv1.DataVolume {
+			Entry("Snapshot", Label("RequiresSnapshot"), func() *cdiv1.DataVolume {
 				if !f.IsSnapshotStorageClassAvailable() {
 					Skip("Clone from volumesnapshot does not work without snapshot capable storage")
 				}

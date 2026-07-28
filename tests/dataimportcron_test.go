@@ -755,7 +755,7 @@ var _ = Describe("DataImportCron", Serial, func() {
 	})
 
 	Context("Change source format of existing DataImportCron", func() {
-		It("[test_id:10034] Should allow switching back and forth from PVC to snapshot sources", func() {
+		It("[test_id:10034] Should allow switching back and forth from PVC to snapshot sources", Label("RequiresSnapshot"), func() {
 			if !f.IsSnapshotStorageClassAvailable() {
 				Skip("Volumesnapshot support needed to test DataImportCron with Volumesnapshot sources")
 			}
