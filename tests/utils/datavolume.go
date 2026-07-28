@@ -24,9 +24,14 @@ import (
 
 const (
 	dataVolumePollInterval = 3 * time.Second
-	dataVolumeCreateTime   = 270 * time.Second
-	dataVolumeDeleteTime   = 270 * time.Second
-	dataVolumePhaseTime    = 270 * time.Second
+	// polls a DV must stay in Failed before a phase wait gives up on it —
+	// long enough (~30s) to let the scratch-space and pod-retry flows pass
+	// through Failed transiently, short enough to spare the rest of a
+	// multi-minute window
+	dataVolumeFailedGracePolls = 10
+	dataVolumeCreateTime       = 270 * time.Second
+	dataVolumeDeleteTime       = 270 * time.Second
+	dataVolumePhaseTime        = 270 * time.Second
 )
 
 const (
@@ -877,6 +882,7 @@ func WaitForDataVolumePhase(ci ClientsIface, namespace string, phase cdiv1.DataV
 // WaitForDataVolumePhaseWithTimeout waits with timeout for DV to be in a specific phase (Pending, Bound, Succeeded etc.)
 func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase cdiv1.DataVolumePhase, dataVolumeName string, timeout time.Duration) error {
 	var actualPhase cdiv1.DataVolumePhase
+	failedPolls := 0
 	err := wait.PollUntilContextTimeout(context.TODO(), dataVolumePollInterval, timeout, true, func(ctx context.Context) (bool, error) {
 		dataVolume, err := ci.Cdi().CdiV1beta1().DataVolumes(namespace).Get(ctx, dataVolumeName, metav1.GetOptions{})
 		if err != nil {
@@ -890,6 +896,18 @@ func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase 
 			return false, nil
 		}
 		actualPhase = dataVolume.Status.Phase
+		if actualPhase == cdiv1.Failed && phase != cdiv1.Failed {
+			// Failed can be transient (scratch-space and pod-retry flows pass
+			// through it), so only give up once it persists across polls;
+			// after that, waiting out the rest of the window cannot succeed
+			// any faster than the controller re-driving the phase.
+			failedPolls++
+			if failedPolls >= dataVolumeFailedGracePolls {
+				return false, fmt.Errorf("DataVolume %s persistently in terminal phase Failed while waiting for phase %s", dataVolumeName, phase)
+			}
+			return false, nil
+		}
+		failedPolls = 0
 		return actualPhase == phase, nil
 	})
 	if err != nil {
