@@ -213,14 +213,18 @@ func NewBlockPVCDefinition(pvcName string, size string, annotations, labels map[
 func WaitForPersistentVolumeClaimPhase(clientSet *kubernetes.Clientset, namespace string, phase k8sv1.PersistentVolumeClaimPhase, pvcName string) error {
 	err := wait.PollUntilContextTimeout(context.TODO(), pvcPollInterval, pvcPhaseTime, true, func(ctx context.Context) (bool, error) {
 		pvc, err := clientSet.CoreV1().PersistentVolumeClaims(namespace).Get(ctx, pvcName, metav1.GetOptions{})
-		fmt.Fprintf(ginkgo.GinkgoWriter, "INFO: Checking PVC phase: %s, resource version %s\n", string(pvc.Status.Phase), pvc.ResourceVersion)
-		if err != nil || pvc.Status.Phase != phase {
-			if err != nil {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "ERROR: checking pvc %s phase failed: %s\n", pvcName, err)
+		if err != nil {
+			if k8serrors.IsNotFound(err) {
+				// the object is gone and cannot reach the awaited phase anymore
+				return false, fmt.Errorf("PVC %s deleted while waiting for phase %s", pvcName, phase)
 			}
-			return false, err
+			// transient API error (throttling, apiserver blip): keep polling
+			// instead of failing a multi-minute wait on a momentary hiccup
+			fmt.Fprintf(ginkgo.GinkgoWriter, "ERROR: checking pvc %s phase failed: %s\n", pvcName, err)
+			return false, nil
 		}
-		return true, nil
+		fmt.Fprintf(ginkgo.GinkgoWriter, "INFO: Checking PVC phase: %s, resource version %s\n", string(pvc.Status.Phase), pvc.ResourceVersion)
+		return pvc.Status.Phase == phase, nil
 	})
 	if err != nil {
 		return fmt.Errorf("PersistentVolumeClaim %s not in phase %s within %v", pvcName, phase, pvcPhaseTime)

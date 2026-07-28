@@ -879,17 +879,21 @@ func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase 
 	var actualPhase cdiv1.DataVolumePhase
 	err := wait.PollUntilContextTimeout(context.TODO(), dataVolumePollInterval, timeout, true, func(ctx context.Context) (bool, error) {
 		dataVolume, err := ci.Cdi().CdiV1beta1().DataVolumes(namespace).Get(ctx, dataVolumeName, metav1.GetOptions{})
-		if err != nil || dataVolume.Status.Phase != phase {
-			if err != nil {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "Error: failed get datavolume: %s, %s\n", dataVolumeName, err.Error())
+		if err != nil {
+			if apierrs.IsNotFound(err) {
+				// the object is gone and cannot reach the awaited phase anymore
+				return false, fmt.Errorf("DataVolume %s deleted while waiting for phase %s", dataVolumeName, phase)
 			}
-			actualPhase = dataVolume.Status.Phase
-			return false, err
+			// transient API error (throttling, apiserver blip): keep polling
+			// instead of failing a multi-minute wait on a momentary hiccup
+			fmt.Fprintf(ginkgo.GinkgoWriter, "Error: failed get datavolume: %s, %s\n", dataVolumeName, err.Error())
+			return false, nil
 		}
-		return true, nil
+		actualPhase = dataVolume.Status.Phase
+		return actualPhase == phase, nil
 	})
 	if err != nil {
-		return fmt.Errorf("DataVolume %s not in phase %s within %v, actual phase=%s", dataVolumeName, phase, timeout, actualPhase)
+		return fmt.Errorf("DataVolume %s not in phase %s within %v, actual phase=%s: %w", dataVolumeName, phase, timeout, actualPhase, err)
 	}
 	return nil
 }
