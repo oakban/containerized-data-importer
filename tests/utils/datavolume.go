@@ -882,6 +882,7 @@ func WaitForDataVolumePhase(ci ClientsIface, namespace string, phase cdiv1.DataV
 // WaitForDataVolumePhaseWithTimeout waits with timeout for DV to be in a specific phase (Pending, Bound, Succeeded etc.)
 func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase cdiv1.DataVolumePhase, dataVolumeName string, timeout time.Duration) error {
 	var actualPhase cdiv1.DataVolumePhase
+	var lastConditions string
 	failedPolls := 0
 	err := wait.PollUntilContextTimeout(context.TODO(), dataVolumePollInterval, timeout, true, func(ctx context.Context) (bool, error) {
 		dataVolume, err := ci.Cdi().CdiV1beta1().DataVolumes(namespace).Get(ctx, dataVolumeName, metav1.GetOptions{})
@@ -896,6 +897,7 @@ func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase 
 			return false, nil
 		}
 		actualPhase = dataVolume.Status.Phase
+		lastConditions = runningConditionSummary(dataVolume)
 		if actualPhase == cdiv1.Failed && phase != cdiv1.Failed {
 			// Failed can be transient (scratch-space and pod-retry flows pass
 			// through it), so only give up once it persists across polls;
@@ -903,7 +905,7 @@ func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase 
 			// any faster than the controller re-driving the phase.
 			failedPolls++
 			if failedPolls >= dataVolumeFailedGracePolls {
-				return false, fmt.Errorf("DataVolume %s persistently in terminal phase Failed while waiting for phase %s", dataVolumeName, phase)
+				return false, fmt.Errorf("DataVolume %s persistently in terminal phase Failed while waiting for phase %s%s", dataVolumeName, phase, lastConditions)
 			}
 			return false, nil
 		}
@@ -911,9 +913,21 @@ func WaitForDataVolumePhaseWithTimeout(ci ClientsIface, namespace string, phase 
 		return actualPhase == phase, nil
 	})
 	if err != nil {
-		return fmt.Errorf("DataVolume %s not in phase %s within %v, actual phase=%s: %w", dataVolumeName, phase, timeout, actualPhase, err)
+		return fmt.Errorf("DataVolume %s not in phase %s within %v, actual phase=%s%s: %w", dataVolumeName, phase, timeout, actualPhase, lastConditions, err)
 	}
 	return nil
+}
+
+// runningConditionSummary renders the DV's Running condition as an error-message
+// suffix, so a failed or timed-out phase wait reports WHY the DataVolume was not
+// progressing instead of only which phase it was stuck in.
+func runningConditionSummary(dv *cdiv1.DataVolume) string {
+	for _, cond := range dv.Status.Conditions {
+		if cond.Type == cdiv1.DataVolumeRunning {
+			return fmt.Sprintf(" (Running=%s reason=%q message=%q)", cond.Status, cond.Reason, cond.Message)
+		}
+	}
+	return ""
 }
 
 // NewDataVolumeWithArchiveContent initializes a DataVolume struct with 'archive' ContentType
