@@ -42,7 +42,7 @@ import (
 )
 
 var _ = Describe("ALL Operator tests", func() {
-	Context("[Destructive]", Serial, func() {
+	Context("[Destructive]", Serial, Label("Destructive"), func() {
 		var _ = Describe("Operator tests", func() {
 			f := framework.NewFramework("operator-test")
 

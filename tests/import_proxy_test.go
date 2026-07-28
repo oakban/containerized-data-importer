@@ -160,7 +160,7 @@ var _ = Describe("Import Proxy tests", func() {
 		}, time.Second*60, time.Second).Should(BeTrue())
 	}
 
-	Context("[Destructive]", Serial, func() {
+	Context("[Destructive]", Serial, Label("Destructive"), func() {
 		DescribeTable("should", func(args importProxyTestArguments) {
 
 			now := time.Now()

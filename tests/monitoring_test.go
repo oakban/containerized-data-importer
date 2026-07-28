@@ -42,7 +42,7 @@ const (
 	metricConsistentPollingTimeout = 2 * time.Minute
 )
 
-var _ = Describe("[Destructive] Monitoring Tests", Serial, func() {
+var _ = Describe("[Destructive] Monitoring Tests", Serial, Label("Destructive"), func() {
 	f := framework.NewFramework("monitoring-test")
 
 	var (
