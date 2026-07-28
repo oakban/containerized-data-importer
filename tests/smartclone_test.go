@@ -20,7 +20,7 @@ import (
 	"kubevirt.io/containerized-data-importer/tests/utils"
 )
 
-var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests that modify CDI CR", Serial, func() {
+var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests that modify CDI CR", Serial, Label("MutatesGlobalConfig"), func() {
 	var cdiCr cdiv1.CDI
 	var cdiCrSpec *cdiv1.CDISpec
 

@@ -35,7 +35,7 @@ var (
 	defaultURL = ""
 )
 
-var _ = Describe("CDI storage class config tests", Serial, func() {
+var _ = Describe("CDI storage class config tests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                   = framework.NewFramework("cdiconfig-test")
 		defaultSc, secondSc *storagev1.StorageClass
@@ -168,7 +168,7 @@ var _ = Describe("CDI storage class config tests", Serial, func() {
 	})
 })
 
-var _ = Describe("CDI ingress config tests, using manifests", Serial, func() {
+var _ = Describe("CDI ingress config tests, using manifests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                       = framework.NewFramework("cdiconfig-test")
 		routeStart              = func() string { return fmt.Sprintf("%s-%s.", routeName, f.CdiInstallNs) }
@@ -287,7 +287,7 @@ var _ = Describe("CDI ingress config tests, using manifests", Serial, func() {
 	})
 })
 
-var _ = Describe("CDI ingress config tests", Serial, func() {
+var _ = Describe("CDI ingress config tests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                       = framework.NewFramework("cdiconfig-test")
 		routeStart              = func() string { return fmt.Sprintf("%s-%s.", routeName, f.CdiInstallNs) }
