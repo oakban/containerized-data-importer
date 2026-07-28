@@ -20,7 +20,7 @@ import (
 	"kubevirt.io/containerized-data-importer/tests/utils"
 )
 
-var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests that modify CDI CR", Serial, func() {
+var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests that modify CDI CR", Serial, Label("MutatesGlobalConfig"), func() {
 	var cdiCr cdiv1.CDI
 	var cdiCrSpec *cdiv1.CDISpec
 
@@ -48,7 +48,7 @@ var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests th
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	It("[test_id:5278]Verify DataVolume Smart Cloning gets disabled by tunable", func() {
+	It("[test_id:5278]Verify DataVolume Smart Cloning gets disabled by tunable", Label("RequiresSnapshot"), func() {
 		if !f.IsSnapshotStorageClassAvailable() {
 			Skip("Smart Clone is not applicable")
 		}
@@ -109,7 +109,7 @@ var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests", 
 		}
 	})
 
-	It("[rfe_id:1106][test_id:3494][crit:high][vendor:cnv-qe@redhat.com][level:component] Verify DataVolume Smart Cloning - volumeMode filesystem - Positive flow", func() {
+	It("[rfe_id:1106][test_id:3494][crit:high][vendor:cnv-qe@redhat.com][level:component] Verify DataVolume Smart Cloning - volumeMode filesystem - Positive flow", Label("RequiresSnapshot"), func() {
 		if !f.IsSnapshotStorageClassAvailable() {
 			Skip("Smart Clone is not applicable")
 		}
@@ -128,7 +128,7 @@ var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests", 
 		verifyPVC(dataVolume, f, utils.DefaultImagePath, expectedMd5)
 	})
 
-	It("[rfe_id:1106][test_id:3495][crit:high][vendor:cnv-qe@redhat.com][level:component] Verify DataVolume Smart Cloning - volumeMode block - Positive flow", func() {
+	It("[rfe_id:1106][test_id:3495][crit:high][vendor:cnv-qe@redhat.com][level:component] Verify DataVolume Smart Cloning - volumeMode block - Positive flow", Label("RequiresSnapshot"), func() {
 		if !f.IsSnapshotStorageClassAvailable() {
 			Skip("Smart Clone is not applicable")
 		}
@@ -150,7 +150,7 @@ var _ = Describe("[vendor:cnv-qe@redhat.com][level:component]SmartClone tests", 
 		verifyPVC(dataVolume, f, utils.DefaultPvcMountPath, expectedMd5)
 	})
 
-	It("[test_id:4987]Verify DataVolume Smart Cloning - volumeMode filesystem - Waits for source to be available", func() {
+	It("[test_id:4987]Verify DataVolume Smart Cloning - volumeMode filesystem - Waits for source to be available", Label("RequiresSnapshot"), func() {
 		if !f.IsSnapshotStorageClassAvailable() {
 			Skip("Smart Clone is not applicable")
 		}

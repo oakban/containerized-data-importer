@@ -202,7 +202,7 @@ var _ = Describe("DataSource", func() {
 				Expect(err).ToNot(HaveOccurred())
 			},
 		),
-		Entry("from VolumeSnapshot",
+		Entry("from VolumeSnapshot", Label("RequiresSnapshot"),
 			func() cdiv1.DataSourceSource {
 				return cdiv1.DataSourceSource{
 					Snapshot: &cdiv1.DataVolumeSourceSnapshot{Namespace: f.Namespace.Name, Name: snap1Name},
@@ -283,7 +283,7 @@ var _ = Describe("DataSource", func() {
 		}, 60*time.Second, pollingInterval).ShouldNot(Equal(ts))
 	})
 
-	Context("snapshot source", func() {
+	Context("snapshot source", Label("RequiresSnapshot"), func() {
 		createSnapDs := func(dsName, snapName string) *cdiv1.DataSource {
 			By(fmt.Sprintf("creating DataSource %s -> %s", dsName, snapName))
 			ds := newDataSource(dsName)

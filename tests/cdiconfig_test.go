@@ -35,7 +35,7 @@ var (
 	defaultURL = ""
 )
 
-var _ = Describe("CDI storage class config tests", Serial, func() {
+var _ = Describe("CDI storage class config tests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                   = framework.NewFramework("cdiconfig-test")
 		defaultSc, secondSc *storagev1.StorageClass
@@ -168,7 +168,7 @@ var _ = Describe("CDI storage class config tests", Serial, func() {
 	})
 })
 
-var _ = Describe("CDI ingress config tests, using manifests", Serial, func() {
+var _ = Describe("CDI ingress config tests, using manifests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                       = framework.NewFramework("cdiconfig-test")
 		routeStart              = func() string { return fmt.Sprintf("%s-%s.", routeName, f.CdiInstallNs) }
@@ -287,7 +287,7 @@ var _ = Describe("CDI ingress config tests, using manifests", Serial, func() {
 	})
 })
 
-var _ = Describe("CDI ingress config tests", Serial, func() {
+var _ = Describe("CDI ingress config tests", Serial, Label("MutatesGlobalConfig"), func() {
 	var (
 		f                       = framework.NewFramework("cdiconfig-test")
 		routeStart              = func() string { return fmt.Sprintf("%s-%s.", routeName, f.CdiInstallNs) }
@@ -487,7 +487,7 @@ var _ = Describe("CDI route config tests", Serial, func() {
 var _ = Describe("CDIConfig instance management", Serial, func() {
 	f := framework.NewFramework("cdiconfig-test")
 
-	Context("[Destructive]", Serial, func() {
+	Context("[Destructive]", Serial, Label("Destructive"), func() {
 		It("[test_id:4952]Should re-create the object if deleted", func() {
 			By("Verifying the object exists")
 			config, err := f.CdiClient.CdiV1beta1().CDIConfigs().Get(context.TODO(), common.ConfigName, metav1.GetOptions{})

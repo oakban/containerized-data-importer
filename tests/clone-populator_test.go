@@ -350,7 +350,7 @@ var _ = Describe("Clone Populator tests", func() {
 		)
 	})
 
-	Context("Clone from Snapshot", func() {
+	Context("Clone from Snapshot", Label("RequiresSnapshot"), func() {
 		var snapshot *snapshotv1.VolumeSnapshot
 
 		BeforeEach(func() {

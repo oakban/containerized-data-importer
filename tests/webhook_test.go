@@ -276,7 +276,7 @@ var _ = Describe("Clone Auth Webhook tests", func() {
 				Entry("[test_id:3936]when using implicit CDI permissions", implicitRole, serviceAccountName, ""),
 			)
 
-			DescribeTable("should deny/allow user when creating snapshot clone datavolume", func(role *rbacv1.Role, saName, groupName string, fail bool) {
+			DescribeTable("should deny/allow user when creating snapshot clone datavolume", Label("RequiresSnapshot"), func(role *rbacv1.Role, saName, groupName string, fail bool) {
 				if !f.IsSnapshotStorageClassAvailable() {
 					Skip("Clone from volumesnapshot does not work without snapshot capable storage")
 				}

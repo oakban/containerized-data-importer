@@ -1068,7 +1068,7 @@ var _ = Describe("all clone tests", func() {
 			ClonerBehavior(cloneStorageClassName, "copy")
 		})
 
-		Context("SmartClone", func() {
+		Context("SmartClone", Label("RequiresSnapshot"), func() {
 			BeforeEach(func() {
 				if !f.IsSnapshotStorageClassAvailable() {
 					Skip("SmartClone does not work without SnapshotStorageClass")
@@ -2513,7 +2513,7 @@ var _ = Describe("all clone tests", func() {
 		})
 	})
 
-	var _ = Describe("[rfe_id:9453] Clone from volumesnapshot source", func() {
+	var _ = Describe("[rfe_id:9453] Clone from volumesnapshot source", Label("RequiresSnapshot"), func() {
 		f := framework.NewFramework(namespacePrefix)
 
 		var snapshot *snapshotv1.VolumeSnapshot
@@ -2566,7 +2566,7 @@ var _ = Describe("all clone tests", func() {
 			}
 		})
 
-		DescribeTable("Should successfully clone without falling back to host assisted", func(volumeMode v1.PersistentVolumeMode, repeat int, crossNamespace bool) {
+		DescribeTable("Should successfully clone without falling back to host assisted", Label("RequiresSnapshot"), func(volumeMode v1.PersistentVolumeMode, repeat int, crossNamespace bool) {
 			var i int
 			var err error
 
@@ -2761,7 +2761,7 @@ var _ = Describe("all clone tests", func() {
 		})
 
 		Context("Clone without a source snapshot", func() {
-			It("[test_id:9718] Should finish the clone after creating the source snapshot", func() {
+			It("[test_id:9718] Should finish the clone after creating the source snapshot", Label("RequiresSnapshot"), func() {
 				if !f.IsSnapshotStorageClassAvailable() {
 					Skip("Clone from volumesnapshot does not work without snapshot capable storage")
 				}
@@ -2798,7 +2798,7 @@ var _ = Describe("all clone tests", func() {
 		})
 
 		Context("sourceRef support", func() {
-			DescribeTable("[test_id:9758] Should clone data from SourceRef snapshot DataSource", func(sizeless bool) {
+			DescribeTable("[test_id:9758] Should clone data from SourceRef snapshot DataSource", Label("RequiresSnapshot"), func(sizeless bool) {
 				if !f.IsSnapshotStorageClassAvailable() {
 					Skip("Clone from volumesnapshot does not work without snapshot capable storage")
 				}
